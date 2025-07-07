@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.6-openjdk-17'  // Готовый образ с нужными версиями
-            args '-v $HOME/.m2:/root/.m2'  // Кэширование Maven-зависимостей
-        }
-    }
+    agent any
     tools {
         jdk 'JDK24'
         maven 'Maven1'  // ← Имя должно совпадать с настройками в Jenkins

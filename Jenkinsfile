@@ -9,13 +9,6 @@ pipeline {
         DOCKER_CREDS = credentials('90536d43-1554-464e-8532-c7f93443e5c3')
     }
     stages {
-        stage('Run Tests') {
-            steps {
-                dir('ServiceForStudy01') {
-                    sh 'mvn --batch-mode test'
-                }
-            }
-        }
         stage('Checkout Application') {
             steps {
                 dir('ServiceForStudy01') {

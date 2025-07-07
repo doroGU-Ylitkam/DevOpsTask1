@@ -3,6 +3,11 @@ pipeline {
     tools {
         maven 'Maven1'  // ← Имя должно совпадать с настройками в Jenkins
     }
+    environment {
+        DOCKER_IMAGE = "your-dockerhub-username/serviceforstudy01"
+        DOCKER_TAG = "latest"
+        DOCKER_CREDS = credentials('90536d43-1554-464e-8532-c7f93443e5c3')
+    }
     stages {
         stage('Run Tests') {
             steps {
@@ -11,13 +16,6 @@ pipeline {
                 }
             }
         }
-    }
-    environment {
-        DOCKER_IMAGE = "your-dockerhub-username/serviceforstudy01"
-        DOCKER_TAG = "latest"
-        DOCKER_CREDS = credentials('90536d43-1554-464e-8532-c7f93443e5c3')
-    }
-    stages {
         stage('Checkout Application') {
             steps {
                 dir('ServiceForStudy01') {

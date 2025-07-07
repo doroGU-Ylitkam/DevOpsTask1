@@ -1,62 +1,56 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
-        DOCKER_IMAGE = 'your-dockerhub-username/service-for-study'
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "your-dockerhub-username/serviceforstudy01"
+        DOCKER_TAG = "latest"
+        DOCKER_CREDS = credentials('dockerhub-creds')
     }
-
     stages {
-        stage('Checkout') {
+        stage('Checkout Application') {
             steps {
-                git branch: 'main', url: 'https://github.com/foxolave/ServiceForStudy01.git'
+                git url: 'https://github.com/foxolave/ServiceForStudy01.git', branch: 'main'
             }
         }
-
         stage('Run Tests') {
             steps {
-                sh './mvnw test'
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
-                }
+                sh 'mvn --batch-mode test'
             }
         }
-
         stage('Build Artifact') {
             steps {
-                sh './mvnw clean package -DskipTests'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                sh 'mvn --batch-mode clean package'
+                archiveArtifacts 'target/*.jar'
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}", '--build-arg JAR_FILE=target/*.jar .')
+                    dockerImage = docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
                 }
             }
         }
-
-        stage('Push to Docker Hub') {
+        stage('Push to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
+                    docker.withRegistry('', env.DOCKER_CREDS) {
+                        dockerImage.push()
                     }
                 }
             }
         }
-
-        stage('Deploy') {
+        stage('Deploy and Test') {
             steps {
-                sh """
-                    docker stop service-for-study || true
-                    docker rm service-for-study || true
-                    docker run -d --name service-for-study -p 8080:8080 ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}
-                """
+                sh 'docker stop service-container || true'
+                sh 'docker rm service-container || true'
+                sh "docker run -d --name service-container -p 8080:8080 ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
+                sleep(time: 10, unit: 'SECONDS') // Wait for app startup
+                sh 'curl -s -X GET http://localhost:8080/status'
+            }
+            post {
+                always {
+                    sh 'docker stop service-container || true'
+                    sh 'docker rm service-container || true'
+                }
             }
         }
     }

@@ -3,7 +3,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "your-dockerhub-username/serviceforstudy01"
         DOCKER_TAG = "latest"
-        DOCKER_CREDS = credentials('dockerhub-creds')
+        DOCKER_CREDS = credentials('dockerhub-creds1')
     }
     stages {
         stage('Checkout Application') {

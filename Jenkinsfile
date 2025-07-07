@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven 3.9.10'  // ← Имя должно совпадать с настройками в Jenkins
+        maven 'Maven1'  // ← Имя должно совпадать с настройками в Jenkins
     }
     stages {
         stage('Run Tests') {

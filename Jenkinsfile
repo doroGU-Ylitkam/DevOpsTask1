@@ -1,5 +1,17 @@
 pipeline {
     agent any
+    tools {
+        maven 'Maven 3.8.6'  // ← Имя должно совпадать с настройками в Jenkins
+    }
+    stages {
+        stage('Run Tests') {
+            steps {
+                dir('ServiceForStudy01') {
+                    sh 'mvn --batch-mode test'
+                }
+            }
+        }
+    }
     environment {
         DOCKER_IMAGE = "your-dockerhub-username/serviceforstudy01"
         DOCKER_TAG = "latest"

@@ -1,6 +1,7 @@
 pipeline {
     agent any
     tools {
+        JDK 'JDK1 24'
         maven 'Maven1'  // ← Имя должно совпадать с настройками в Jenkins
     }
     environment {

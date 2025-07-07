@@ -8,24 +8,32 @@ pipeline {
     stages {
         stage('Checkout Application') {
             steps {
-                git url: 'https://github.com/foxolave/ServiceForStudy01.git', branch: 'main'
+                dir('ServiceForStudy01') {
+                    git url: 'https://github.com/foxolave/ServiceForStudy01.git', branch: 'main'
+                }
             }
         }
         stage('Run Tests') {
             steps {
-                sh 'mvn --batch-mode test'
+                dir('ServiceForStudy01') {
+                    sh 'mvn --batch-mode test'
+                }
             }
         }
         stage('Build Artifact') {
             steps {
-                sh 'mvn --batch-mode clean package'
-                archiveArtifacts 'target/*.jar'
+                dir('ServiceForStudy01') {
+                    sh 'mvn --batch-mode clean package'
+                    archiveArtifacts 'target/*.jar'
+                }
             }
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
+                dir('ServiceForStudy01') {
+                    script {
+                        dockerImage = docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
+                    }
                 }
             }
         }
@@ -43,7 +51,7 @@ pipeline {
                 sh 'docker stop service-container || true'
                 sh 'docker rm service-container || true'
                 sh "docker run -d --name service-container -p 8080:8080 ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
-                sleep(time: 10, unit: 'SECONDS') // Wait for app startup
+                sleep(time: 10, unit: 'SECONDS')
                 sh 'curl -s -X GET http://localhost:8080/status'
             }
             post {
